@@ -1,5 +1,5 @@
 const weatherAPI = "http://api.weatherstack.com/current?access_key=416f00627319577ff56a74a3c74fceca";
-const mapAPI = "https://api.tomtom.com/map/1/staticimage?key=qZdBoTXiUh0klHvOzvSbZZ8vviAbBJE9&zoom=5&width=350&height=250";
+const mapAPI = "http://api.tomtom.com/map/1/staticimage?key=qZdBoTXiUh0klHvOzvSbZZ8vviAbBJE9&zoom=5&width=350&height=250";
 
 const root = document.getElementById("root");
 const popup = document.getElementById("popup");
