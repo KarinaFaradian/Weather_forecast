@@ -1,5 +1,4 @@
-const weatherAPI = "http://api.weatherstack.com/current?access_key=416f00627319577ff56a74a3c74fceca";
-const mapAPI = "http://api.tomtom.com/map/1/staticimage?key=qZdBoTXiUh0klHvOzvSbZZ8vviAbBJE9&zoom=5&width=350&height=250";
+const mapAPI = "https://api.tomtom.com/map/1/staticimage?key=qZdBoTXiUh0klHvOzvSbZZ8vviAbBJE9&zoom=5&width=350&height=250";
 
 const root = document.getElementById("root");
 const popup = document.getElementById("popup");
@@ -10,19 +9,15 @@ const closing = document.getElementById("close");
 let store = {
   city: "London",
   temperature: 0,
-  observationTime: "00:00 AM",
-  isDay: "yes",
   description: "",
   lat: 51.517,
   lon: -0.106,
   properties: {
-    feelslike: {},
     cloudcover: {},
     humidity: {},
     pressure: {},
-    uvIndex: {},
     visibility: {},
-    windSpeed: {}
+    wind: {}
   }
 };
 
@@ -44,44 +39,36 @@ const renderProperty = (properties) => {
 
 const fetchData = async () => {
   try {
-    const query = localStorage.getItem("query") || store.city;
-    const result = await fetch(`${weatherAPI}&query=${query}`);
+    const city = localStorage.getItem("city") || store.city;
+    const result = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=411ca8d96f45514a3505bcc663681805&units=metric`);
     const data = await result.json();
     const {
-      current: {
-        cloudcover,
-        temperature,
+      coord:
+        {
+          lon,
+          lat
+        },
+      weather: [{
+        main: description
+      }],
+      main: {
+        temp: temperature,
         humidity,
-        observation_time: observationTime,
-        pressure,
-        uv_index: uvIndex,
-        visibility,
-        is_day: isDay,
-        weather_descriptions: description,
-        wind_speed: windSpeed
+        pressure
       },
-      location: {
-        name,
-        lat,
-        lon
-      }
+      visibility,
+      name,
+      wind
     } = data;
 
     store = {
       ...store,
-      isDay,
       city: name,
       lat,
       lon,
       temperature,
-      observationTime,
-      description: description[0],
+      description,
       properties: {
-        cloudcover: {
-          title: "cloudcover",
-          value: `${cloudcover} %`,
-          icon: "cloud.png"
-        },
         humidity: {
           title: "humidity",
           value: `${humidity} %`,
@@ -92,20 +79,15 @@ const fetchData = async () => {
           value: `${pressure} mmHg`,
           icon: "gauge.png"
         },
-        uvIndex: {
-          title: "uv Index",
-          value: `${uvIndex}`,
-          icon: "uv-index.png"
+        wind: {
+          title: "wind speed",
+          value: `${wind.speed} km/h`,
+          icon: "wind.png"
         },
         visibility: {
           title: "visibility",
-          value: `${visibility} km`,
+          value: `${visibility}`,
           icon: "visibility.png"
-        },
-        windSpeed: {
-          title: "wind speed",
-          value: `${windSpeed} km/h`,
-          icon: "wind.png"
         }
       }
     };
@@ -117,17 +99,17 @@ const fetchData = async () => {
 fetchData();
 
 const getImage = (description) => {
-  const value = description.toLowerCase();
-
-  switch (value) {
-    case "partly cloudy":
+  switch (description) {
+    case "Rain":
       return "partly.png";
-    case "cloud":
+    case "Clouds":
       return "cloudy.png";
-    case "haze":
+    case "Haze":
       return "fog.png";
-    case "sunny":
+    case "Sunny":
       return "sunny.png";
+    case "Clear":
+      return "clear.png";
     default:
       return "temp.png";
   }
@@ -135,7 +117,7 @@ const getImage = (description) => {
 
 const markup = () => {
   const {
-    city, description, observationTime, temperature, isDay, properties
+    city, description, temperature, isDay, properties
   } = store;
 
   let containerClass = isDay === "yes" ? "is-day" : "";
@@ -147,7 +129,6 @@ const markup = () => {
                   <div class="city-subtitle">Weather today in</div>
                     <div class="city-title" id="city">
                     <span>${city}</span>
-                    <div class="city-info__subtitle">as of ${observationTime}</div>
                     <div class="city-info__title">${temperature}°</div>
                   </div>
                 </div>
