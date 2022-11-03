@@ -24,6 +24,27 @@ let store = {
   },
 };
 
+const getCurrentCity = async () => {
+  try {
+    const current = await fetch('http://www.geoplugin.net/json.gp');
+    const currentCity = await current.json();
+    const {
+      geoplugin_city: currentName,
+      geoplugin_longitude: currentLon,
+      geoplugin_latitude: currentLat,
+    } = currentCity;
+    store = {
+      ...store,
+      city: currentName,
+      lat: currentLat,
+      lon: currentLon,
+    };
+    renderComponent();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const renderProperty = (properties) =>
   Object.values(properties)
     .map(
@@ -211,3 +232,5 @@ function showHistory() {
   }
   document.getElementById('city-list').innerHTML = history;
 }
+
+getCurrentCity().then(fetchData).then(fetchMap);
