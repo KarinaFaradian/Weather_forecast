@@ -6,14 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
 
-    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <div id="app">
       <div id="root">
         <img class="loader" src="./img/loader.gif" alt="loader" />
       </div>
-      <img id="map" alt="map"/>
+      <img id="map" alt="map" />
       <div class="popup" id="popup">
         <form action="GET" class="form" id="form">
           <div class="form-group">
@@ -32,15 +31,16 @@
               id="submit-button"
               value="OK"
             />
+            <ol id='city-list' href="#">
+            </ol>
           </div>
         </form>
-        
+
         <div class="popup-close" id="close">
           <span></span>
         </div>
       </div>
     </div>
 
-    <script src="./script.js"></script>
   </body>
 </html>
