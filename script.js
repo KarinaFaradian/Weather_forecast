@@ -2,6 +2,7 @@ import './style.css';
 
 const mapAPI =
   'https://api.tomtom.com/map/1/staticimage?key=qZdBoTXiUh0klHvOzvSbZZ8vviAbBJE9&zoom=5&width=350&height=250';
+const positionAPI = 'https://api.ipregistry.co/?key=unv4cf1lm9iwwnzv';
 
 const root = document.getElementById('root');
 const popup = document.getElementById('popup');
@@ -24,26 +25,24 @@ let store = {
   },
 };
 
-const getCurrentCity = async () => {
+async function getCurrentPosition() {
   try {
-    const current = await fetch('http://www.geoplugin.net/json.gp');
-    const currentCity = await current.json();
+    const response = await fetch(positionAPI);
+    const currentPosition = await response.json();
     const {
-      geoplugin_city: currentName,
-      geoplugin_longitude: currentLon,
-      geoplugin_latitude: currentLat,
-    } = currentCity;
+      location: { city, latitude, longitude },
+    } = currentPosition;
     store = {
       ...store,
-      city: currentName,
-      lat: currentLat,
-      lon: currentLon,
+      city,
+      lat: latitude,
+      lon: longitude,
     };
-    renderComponent();
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    console.log(error);
   }
-};
+}
+getCurrentPosition().then(fetchMap);
 
 const renderProperty = (properties) =>
   Object.values(properties)
@@ -207,8 +206,8 @@ form.addEventListener('submit', handleSubmit);
 textInput.addEventListener('input', handleInput);
 
 let cityList = [];
-// eslint-disable-next-line no-undef
-if (localStorage.getItem('title') !== undefined) {
+// eslint-disable-next-line no-undef, eqeqeq
+if (localStorage.getItem('title') != undefined) {
   cityList = JSON.parse(localStorage.getItem('title'));
   showHistory();
 }
@@ -228,9 +227,9 @@ function showHistory() {
   let history = '';
   // eslint-disable-next-line no-restricted-syntax, guard-for-in
   for (const key in cityList) {
-    history += `${cityList[key].title}<br>`;
+    history += `<ul>
+                <li id='li'>${cityList[key].title}</li>
+              </ul>`;
   }
   document.getElementById('city-list').innerHTML = history;
 }
-
-getCurrentCity().then(fetchData).then(fetchMap);
