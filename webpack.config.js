@@ -6,7 +6,7 @@ const mode = process.env.NODE_END || 'development';
 const devMode = mode === 'development';
 
 module.exports = {
-  entry: './script.js',
+  entry: './src/script.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'main.js',
@@ -19,7 +19,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: './index.html',
+      template: './src/index.html',
     }),
   ],
   module: {
