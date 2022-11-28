@@ -1,4 +1,5 @@
 import './style.css';
+import showHistory from './scripts/showHistory';
 
 const mapAPI =
   'https://api.tomtom.com/map/1/staticimage?key=qZdBoTXiUh0klHvOzvSbZZ8vviAbBJE9&zoom=5&width=350&height=250';
@@ -16,6 +17,7 @@ let store = {
   description: '',
   lat: 0,
   lon: 0,
+  img: 'http://openweathermap.org/img/wn/04n@2x.png',
   properties: {
     cloudcover: {},
     humidity: {},
@@ -69,7 +71,7 @@ const fetchData = async () => {
     const data = await result.json();
     const {
       coord: { lon, lat },
-      weather: [{ main: description }],
+      weather: [{ main: description, icon: img }],
       main: { temp: temperature, humidity, pressure },
       visibility,
       name,
@@ -83,26 +85,27 @@ const fetchData = async () => {
       lon,
       temperature,
       description,
+      img,
       properties: {
         humidity: {
           title: 'humidity',
           value: `${humidity} %`,
-          icon: './img/icons/humidity.png',
+          icon: '../img/icons/humidity.png',
         },
         pressure: {
           title: 'pressure',
           value: `${pressure} mmHg`,
-          icon: './img/icons/gauge.png',
+          icon: '../img/icons/gauge.png',
         },
         wind: {
           title: 'wind speed',
           value: `${wind.speed} km/h`,
-          icon: './img/icons/wind.png',
+          icon: '../img/icons/wind.png',
         },
         visibility: {
           title: 'visibility',
           value: `${visibility}`,
-          icon: './img/icons/visibility.png',
+          icon: '../img/icons/visibility.png',
         },
       },
     };
@@ -113,22 +116,36 @@ const fetchData = async () => {
 };
 fetchData();
 
-const getImage = (description) => {
-  switch (description) {
-    case 'Rain':
-      return '../img/partly.png';
-    case 'Clouds':
-      return '../img/cloudy.png';
-    case 'Haze':
-      return '../img/fog.png';
-    case 'Sunny':
-      return '../img/sunny.png';
-    case 'Clear':
-      return '../img/clear.png';
-    default:
-      return '../img/temp.png';
+async function getImage() {
+  try {
+    const { img } = store;
+    const res = await fetch(`http://openweathermap.org/img/wn/${img}@2x.png`);
+    const ress = await res.blob();
+    const image = document.getElementById('img');
+    image.style = 'position:absolute;top:200px;left:200px;';
+    image.src = URL.createObjectURL(ress);
+    fetchData();
+  } catch (err) {
+    console.log(err);
   }
-};
+}
+
+// const getImage = (description) => {
+//   switch (description) {
+//     case 'Rain':
+//       return '../img/partly.png';
+//     case 'Clouds':
+//       return '../img/cloudy.png';
+//     case 'Haze':
+//       return '../img/fog.png';
+//     case 'Sunny':
+//       return '../img/sunny.png';
+//     case 'Clear':
+//       return '../img/clear.png';
+//     default:
+//       return '../img/temp.png';
+//   }
+// };
 
 const markup = () => {
   const { city, description, temperature, isDay, properties } = store;
@@ -148,7 +165,6 @@ const markup = () => {
               </div>
             </div>
             <div>
-                <img class="icon" src="${getImage(description)}" alt="hi" />
                 <div class="description">${description}</div>
             </div>
             <div>
@@ -200,36 +216,12 @@ async function fetchMap() {
     console.log(error);
   }
 }
-fetchMap();
 
 closing.addEventListener('click', handleSubmit);
 form.addEventListener('submit', handleSubmit);
 textInput.addEventListener('input', handleInput);
 
-let cityList = [];
-// eslint-disable-next-line no-undef, eqeqeq
-if (localStorage.getItem('title') != undefined) {
-  cityList = JSON.parse(localStorage.getItem('title'));
-  showHistory();
-}
-
-document.getElementById('submit-button').onclick = function () {
-  const cityValue = textInput.value;
-  const cityStorage = {};
-  cityStorage.title = cityValue;
-  const i = cityList.length;
-  cityList[i] = cityStorage;
-  showHistory();
-  localStorage.setItem('title', JSON.stringify(cityList));
-};
-
-function showHistory() {
-  let history = '';
-  // eslint-disable-next-line no-restricted-syntax, guard-for-in
-  for (const key in cityList) {
-    history += `<ul>
-                <li id='li'>${cityList[key].title}</li>
-              </ul>`;
-  }
-  document.getElementById('city-list').innerHTML = history;
-}
+showHistory();
+fetchMap();
+fetchData().then(getImage);
+getImage();
